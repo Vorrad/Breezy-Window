@@ -31,26 +31,6 @@ void setServoPulseWidth(int pulseWidth) {
 	OCR1B = pulseWidth; // Pulse width for servo position
 }
 
-int main() {
-	setupPWM();
-	for (int n=0; n<=6;n++)
-	{
-		Window_Open_10deg();
-		_delay_ms(300);
-	}
-	
-	_delay_ms(3000);
-	
-	for (int n=0; n<=6;n++)
-	{
-		Window_close_10deg();
-		_delay_ms(300);
-	}
-	while (1) {
-		
-	}
-}
-
 long mapServoAngle(long x, long in_min, long in_max, long out_min, long out_max) {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

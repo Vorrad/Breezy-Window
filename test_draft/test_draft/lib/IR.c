@@ -96,7 +96,7 @@ void dump_data()
 	}
 }
 
-void decode_data(uint8_t *output, DATA_TYPE d, DATA_CNT_TYPE c)
+void decode_data(uint8_t *output, uint8_t *error_flag, DATA_TYPE d, DATA_CNT_TYPE c)
 {
 	// for data: c == 68
 	// for dito: c ==  4
@@ -105,9 +105,12 @@ void decode_data(uint8_t *output, DATA_TYPE d, DATA_CNT_TYPE c)
 		case  4:
 		{
 			if (data[0] > START_CNT && data[3] < LS_CNT)
-			*output = DITTO_CODE;
-			else
-			UART_putstring("[ERR] unrecognized data\n");
+			{
+				*output = DITTO_CODE;
+				*error_flag = 0;
+			}
+			else						// unrecognized data
+				*error_flag = ERROR_FLAG;
 			break;
 		}
 		case 68:
@@ -118,16 +121,16 @@ void decode_data(uint8_t *output, DATA_TYPE d, DATA_CNT_TYPE c)
 				tmp2 |= ( (data[2*i+52] < LS_CNT) ? 0 : 1) << i;
 			}
 			if ( (tmp1 ^ tmp2) == 0xff)
+			{
 				*output = tmp1;
-			else
-				UART_putstring("[ERR] checksum failed\n");				
+				*error_flag = 0;
+			}
+			else						// checksum failed
+				*error_flag = ERROR_FLAG;			
 			break;
 		}
-		default:
-		{
-			*output = ERROR_CODE;
-			UART_putstring("[ERR] unrecognized data\n");
-		}
+		default:						// unrecognized data
+			*error_flag = ERROR_FLAG;
 	}
 }
 
@@ -177,13 +180,19 @@ ISR(PCINT2_vect){
 ISR(TIMER2_COMPA_vect) {
 	timer2_acc++;
 	
-	// triggered every 90 ms
+	// polling every 90 ms
 	if (timer2_acc == 6 && data_cnt != 0){
-		uint8_t d;
-		decode_data(&d, data, data_cnt);
-		char buf[30];
-		sprintf(buf, "decoded data:%u\n", d);
-		UART_putstring(buf);
+		uint8_t d, f=0;
+		decode_data(&d,&f, data, data_cnt);
+		if (f == ERROR_FLAG)
+			UART_putstring("[ERR] data error\n");
+		else
+		{
+			char buf[30];
+			sprintf(buf, "decoded data:%u\n", d);
+			UART_putstring(buf);
+		}
+		
 		clean_data();
 		timer2_acc = 0;
 		period_flag = 0;

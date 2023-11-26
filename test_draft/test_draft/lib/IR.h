@@ -25,8 +25,8 @@
 #define MAX_COUNT 100
 
 // CODE DEFINITION
-#define ERROR_CODE 0xff
-#define DITTO_CODE 0x0f
+#define ERROR_FLAG 0x55
+#define DITTO_CODE 0xff
 
 #ifndef IR_H_
 #define IR_H_

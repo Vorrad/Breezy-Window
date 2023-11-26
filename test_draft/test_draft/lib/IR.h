@@ -11,16 +11,22 @@
 
 */
 
+// TYPE DEFINITION
+#define DATA_TYPE int32_t
+#define DATA_CNT_TYPE uint16_t
+
 // PIN DEFINITION
 #define IR_BIT PORTD2	// DDD2 == PORTD2 == PIND2 == 2
 #define IR_PIN PIND
 
 // DECODING DEFINITION
-#define START_CNT (9000 / 4)
-#define SHORT_CNT (560  / 4)
-#define LONG_CNT  (1690 / 4)
-#define BIAS      (80   / 4)
+#define START_CNT 2000		// if duration more than 2000: start
+#define LS_CNT	  280
 #define MAX_COUNT 100
+
+// CODE DEFINITION
+#define ERROR_CODE 0xff
+#define DITTO_CODE 0x0f
 
 #ifndef IR_H_
 #define IR_H_

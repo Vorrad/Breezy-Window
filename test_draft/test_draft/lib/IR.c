@@ -10,6 +10,7 @@
 
 #include "uart.h"
 #include "IR.h"
+#include "stepper.h"
 
 // to store date from the IR pulse
 volatile uint8_t  ovf_flag;
@@ -134,6 +135,73 @@ void decode_data(uint8_t *output, uint8_t *error_flag, DATA_TYPE d, DATA_CNT_TYP
 	}
 }
 
+void switch_command(uint8_t d){
+	
+	char buf[30];
+	sprintf(buf, "d: %hhu\n",d);
+	UART_putstring(buf);
+	
+	static volatile enum mode m=AUTO;	
+	static volatile uint8_t _d;			// last command
+	
+	switch(m){
+		
+		// AUTO mode
+		
+		case AUTO:{
+			switch(d){
+				
+				case DITTO_CODE:{
+					if (_d != MODE_SELECT)
+						switch_command(_d);	// repeat last command
+					break;
+				}
+				
+				case MODE_SELECT:{
+					m = MANUAL;
+					UART_putstring("MODE set to MANUAL\n");
+					break;
+				}
+			}
+			break;
+		}
+		
+		// MANUAL mode
+		
+		case MANUAL:{
+			switch(d){
+				
+				case DITTO_CODE:{
+					if (_d != MODE_SELECT)
+						switch_command(_d);	// repeat last command
+					break;
+				}
+				
+				case MODE_SELECT:{
+					_d = MODE_SELECT;
+					m = AUTO;
+					UART_putstring("MODE set to AUTO\n");
+					break;
+				}
+				
+				case CURTAIN_UP:{
+					_d = CURTAIN_UP;
+					curtain_rolling(1, 512);
+					break;
+				}
+				
+				case CURTAIN_DOWN:{
+					_d = CURTAIN_DOWN;
+					curtain_rolling(-1, 512);
+					break;
+				}
+			}
+			break;
+		}
+	}
+}
+
+
 ISR(TIMER1_OVF_vect){
 	cli();
 	ovf_flag++;
@@ -186,12 +254,7 @@ ISR(TIMER2_COMPA_vect) {
 		decode_data(&d,&f, data, data_cnt);
 		if (f == ERROR_FLAG)
 			UART_putstring("[ERR] data error\n");
-		else
-		{
-			char buf[30];
-			sprintf(buf, "decoded data:%u\n", d);
-			UART_putstring(buf);
-		}
+		else switch_command(d);
 		
 		clean_data();
 		timer2_acc = 0;

@@ -28,11 +28,19 @@
 #define ERROR_FLAG 0x55
 #define DITTO_CODE 0xff
 
+// MODE DEFINITION
+enum mode {AUTO, MANUAL};
+
+// COMMAND CODE DEFINITION
+#define MODE_SELECT		71
+#define CURTAIN_UP		70
+#define CURTAIN_DOWN	21
+#define WINDOW_OPEN		9
+#define WINDOW_CLOSE	7
+
 #ifndef IR_H_
 #define IR_H_
 
 void init_IR(); // initialize Infrared Receiver
-
-
 
 #endif /* IR_H_ */

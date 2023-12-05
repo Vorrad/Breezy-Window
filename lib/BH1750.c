@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "BH1750.h"
+#include "uart.h"
 
 
 void TWI_init() {
@@ -37,6 +38,7 @@ uint8_t TWI_read_NACK() {
 }
 
 void BH1750_init() {
+	TWI_init();
 	TWI_start();
 	TWI_write(BH1750_ADDR << 1); // 发送地址+写位
 	TWI_write(BH1750_CMD_CONT_HIGH_RES_MODE); // 发送命令

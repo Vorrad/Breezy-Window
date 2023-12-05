@@ -2,12 +2,11 @@
 
 #include "common.h"
 #include "BH1750.h"
-#include "uart.h"
 
 
 void TWI_init() {
 	TWBR = ((F_CPU / F_SCL) - 16) / 2;
-	TWCR = (1 << TWEN); // 启用TWI
+	TWCR = (1 << TWEN);		// Enable TWI
 }
 
 void TWI_start() {
@@ -40,12 +39,12 @@ uint8_t TWI_read_NACK() {
 void BH1750_init() {
 	TWI_init();
 	TWI_start();
-	TWI_write(BH1750_ADDR << 1); // 发送地址+写位
-	TWI_write(BH1750_CMD_CONT_HIGH_RES_MODE); // 发送命令
+	TWI_write(BH1750_ADDR << 1);					// device address | write
+	TWI_write(BH1750_CMD_CONT_HIGH_RES_MODE);		// set 
 	TWI_stop();
 }
 
-void BH1750_read(){
+uint16_t BH1750_read(){
 	
 	static uint16_t lux = 0;
 	
@@ -55,8 +54,5 @@ void BH1750_read(){
 	lux = (lux << 8) | TWI_read_NACK(); // 读取两个字节
 	TWI_stop();
 	
-	// 处理和发送lux值的代码
-	static char buf[30];
-	sprintf(buf, "lux: %u\n", lux);
-	UART_putstring(buf);
+	return lux;
 }

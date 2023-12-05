@@ -6,6 +6,6 @@
 #define BH1750_CMD_CONT_HIGH_RES_MODE 0x10 // continuous high-res command
 
 void BH1750_init();
-void BH1750_read();
+uint16_t BH1750_read();
 
 #endif 

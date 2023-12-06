@@ -1,16 +1,19 @@
-/*
- * IR.c
- *
- * Created: 2023/11/17 14:54:58
- *  Author: Chen Chen
- */ 
+///*
+ //* IR.c
+ //*
+ //* Created: 2023/11/17 14:54:58
+ //*  Author: Chen Chen
+ //*/ 
+
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include "common.h"
 #include "uart.h"
 #include "IR.h"
 #include "stepper.h"
+#include "servo.h"
 
 // to store date from the IR pulse
 volatile uint8_t  ovf_flag;
@@ -63,7 +66,6 @@ void init_IR(){
 	
 	// D2 as input
 	DDRD &= ~(1 << IR_BIT);
-	// debug: D3 as output, showing D2's result
 	DDRD |= (1 << DDD3);
 	
 	// pin change interrupt
@@ -160,6 +162,7 @@ void switch_command(uint8_t d){
 				case MODE_SELECT:{
 					m = MANUAL;
 					UART_putstring("MODE set to MANUAL\n");
+					control_mode = 1;
 					break;
 				}
 			}
@@ -180,6 +183,7 @@ void switch_command(uint8_t d){
 				case MODE_SELECT:{
 					_d = MODE_SELECT;
 					m = AUTO;
+					control_mode = 0;
 					UART_putstring("MODE set to AUTO\n");
 					break;
 				}
@@ -195,6 +199,18 @@ void switch_command(uint8_t d){
 					curtain_rolling(-1, 512);
 					break;
 				}
+				
+				case WINDOW_OPEN:{					
+					_d = WINDOW_OPEN;					
+					rotateServo('+');
+					break;
+				}
+			
+				case WINDOW_CLOSE:{
+					_d = WINDOW_CLOSE;
+					rotateServo('-');
+					break;
+				}
 			}
 			break;
 		}
@@ -208,16 +224,6 @@ ISR(TIMER1_OVF_vect){
 	sei();
 }
 
-// debug: manually dump data
-ISR(PCINT0_vect){
-	if (!(PINB & (1 << PINB0)))
-	{
-		dump_data();
-		clean_data();
-	}
-}
-
-// debug: show D2 input at D3
 
 ISR(PCINT2_vect){
 	

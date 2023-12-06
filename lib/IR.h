@@ -15,10 +15,6 @@
 #define DATA_TYPE int32_t
 #define DATA_CNT_TYPE uint16_t
 
-// PIN DEFINITION
-#define IR_BIT PORTD2	// DDD2 == PORTD2 == PIND2 == 2
-#define IR_PIN PIND
-
 // DECODING DEFINITION
 #define START_CNT 2000		// if duration more than 2000: start
 #define LS_CNT	  280

@@ -24,7 +24,7 @@
 #define SLAVE_ADDR	0x09
 
 
-enum mode control_mode=AUTO;
+enum mode control_mode=MANUAL;
 
 
 void write_to_slave(char* buf){

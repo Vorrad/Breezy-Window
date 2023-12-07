@@ -3,6 +3,8 @@
 
 #include "stepper.h"
 
+volatile int stepper_angle=0;
+
 // Functions
 void step_CW( void );
 
@@ -14,22 +16,63 @@ void init_stepper()
    DDRB = 0b00001111;
 }
 
-void curtain_rolling (int8_t direction,uint16_t steps)//2048 steps for 1 revolution
+void curtain_roll2top(){
+	if (stepper_angle < 6144){
+		for (int i=stepper_angle; i < 6144; i++){
+			step_CW();
+			_delay_ms(40);
+		}
+		stepper_angle = 6144;
+	}
+}
+
+void curtain_roll2bottom(){
+	if (stepper_angle > 0){
+		for (int i=stepper_angle; i > 0; i--){
+			step_CCW();
+			_delay_ms(40);
+		}
+		stepper_angle = 0;
+	}
+}
+
+void curtain_rolling (int8_t direction, int steps)//2048 steps for 1 revolution
 {
 	if (direction>0)
 	{
-		for(int i=0;i<steps;i++)
-		{
-			step_CW();
-			_delay_ms(30);
+		if (stepper_angle + steps < 6144){			
+			for (int i=0;i<steps;i++)
+			{
+				step_CW();
+				_delay_ms(40);
+				stepper_angle++;
+			}
+		}
+		else{
+			for (int i=stepper_angle; i < 6144; i++)
+			{
+				step_CW();
+				_delay_ms(40);
+				stepper_angle++;
+			}
 		}
 	}
 	else
 	{
-		for(int i=0;i<steps;i++)
-		{
-			step_CCW();
-			_delay_ms(30);
+		if (stepper_angle - steps > 0){			
+			for (int i=0; i<steps; i++)
+			{
+				step_CCW();
+				_delay_ms(40);
+				stepper_angle--;
+			}
+		}
+		else{
+			for (int i=stepper_angle; i>0; i--){
+				step_CCW();
+				_delay_ms(40);
+				stepper_angle--;
+			}
 		}
 	}
 }

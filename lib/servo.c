@@ -41,6 +41,9 @@ void Open_window_to(uint8_t angle) {
 	{
 		angle = 96;  // Limit the angle to 96 degrees
 	}
+	if (angle < 0){
+		angle = 0;
+	}
 	
 	
 	uint8_t units = angle / 12; //12 is unit degree it will rotate with OCR0B
@@ -53,7 +56,7 @@ void Open_window_to(uint8_t angle) {
 
 void rotateServo(char direction) {
 	uint8_t currentOCR0B = OCR0B; // Current OCR0B value, initialized to initial value
-	if (direction == '+' && currentOCR0B < 20) {
+	if (direction == '+' && currentOCR0B < 11) {
 		
 		currentOCR0B++;
 		} else if (direction == '-' && currentOCR0B > 3) {

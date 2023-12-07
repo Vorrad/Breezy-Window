@@ -19,6 +19,7 @@
 #include "lib/BH1750.h"
 #include "lib/ST7735.h"
 #include "lib/LCD_GFX.h"
+#include "lib/SHT30.h"
 
 #define SLAVE_ADDR	0x09
 
@@ -55,6 +56,7 @@ int main(void) {
 			
 			// check illumination
 			uint16_t lux = BH1750_read();
+			UART_putstring("BH1750 complete\n");
 			if (lux > LUX_THRESHOLD_HIGH){
 				sprintf(buf, "lux:%u\n", lux);
 				UART_putstring(buf);
@@ -66,8 +68,16 @@ int main(void) {
 				curtain_roll2bottom();		
 			}
 			
+			// get temperature and humidity
+			triggerMeasurement();
+			UART_putstring("trigger complete\n");
+			char t_h[6];
+			readTH(t_h);
+			UART_putstring("readTH complete\n");
+			
+			
 			// check humidity
-			uint16_t hum = 60; // replace with read_humidity
+			uint16_t hum = atoi(t_h) % 100;
 			if (hum > HUM_THRESHOLD_HIGH){
 				sprintf(buf, "hum:%u\n", hum);
 				UART_putstring(buf);
@@ -79,8 +89,7 @@ int main(void) {
 				Open_window_to(48);
 			}
 			
-			sprintf(buf, "%u%u", hum, lux);
-			write_to_slave(buf);
+			write_to_slave(t_h);
 		}		
 		_delay_ms(20000);
 	}

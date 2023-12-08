@@ -143,7 +143,7 @@ void switch_command(uint8_t d){
 	sprintf(buf, "d: %hhu\n",d);
 	UART_putstring(buf);
 	
-	static volatile enum mode m=AUTO;	
+	static volatile enum mode m=DEFAULT_MODE;	
 	static volatile uint8_t _d;			// last command
 	
 	switch(m){

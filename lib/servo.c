@@ -1,14 +1,15 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 #include "servo.h"
 
 long mapServoAngle(long x, long in_min, long in_max, long out_min, long out_max);
 
-int angle = 0;
+volatile int _angle = 0;
 
 
-void setupPWM() {
+void init_servo() {
 	
 	// set D5 (OC0B) as output
 	DDRD |= (1 << DDD5);
@@ -36,7 +37,13 @@ void setupPWM() {
 	
 }
 
-void Open_window_to(uint8_t angle) {
+void Open_window_to(uint16_t angle) {
+	cli();
+	char buf[30];
+	sprintf(buf, "current angle: %u\n", _angle);
+	UART_putstring(buf);
+	sprintf(buf, "desired angle: %u\n", angle);
+	UART_putstring(buf);
 	if (angle > 96)
 	{
 		angle = 96;  // Limit the angle to 96 degrees
@@ -45,12 +52,22 @@ void Open_window_to(uint8_t angle) {
 		angle = 0;
 	}
 	
+	uint8_t units;
+	if (angle > _angle){
+		units = (angle - _angle) / 12;
+		for (int i=0; i<units; i++)
+			rotateServo('+');
+	}
+	else if (angle < _angle){
+		units = (_angle - angle) / 12;
+		for (int i=0; i<units; i++)
+			rotateServo('-');
+	}
+	else if (angle == _angle && angle == 0)
+		OCR0B=3;
 	
-	uint8_t units = angle / 12; //12 is unit degree it will rotate with OCR0B
-	// Calculate the OCR0B value
-	OCR0B= 3 + units; // 3 is the least value the OCR0B can be to drive the motor (0 degree)
-	_delay_ms(10000);
-
+	_angle = angle;
+	sei();
 }
 
 
@@ -66,5 +83,5 @@ void rotateServo(char direction) {
 
 	// Set the new OCR0B value
 	OCR0B = currentOCR0B;
-	_delay_ms(10000);
+	_delay_ms(5000);
 }

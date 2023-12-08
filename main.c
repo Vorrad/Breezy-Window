@@ -24,7 +24,7 @@
 #define SLAVE_ADDR	0x09
 
 
-enum mode control_mode=AUTO;
+enum mode control_mode=DEFAULT_MODE;
 
 
 void write_to_slave(char* buf){
@@ -41,12 +41,13 @@ int main(void) {
 	
 	UART_init(BAUD_PRESCALER);
 	init_stepper();
-	setupPWM();
+	init_servo();
 	BH1750_init();
 	init_IR();
 	TWI_init();
-	
+	UART_putstring("initialized\n");
 	Open_window_to(0);
+	
 	
 	char buf[30];
 	while (1){
@@ -56,36 +57,26 @@ int main(void) {
 			
 			// check illumination
 			uint16_t lux = BH1750_read();
-			UART_putstring("BH1750 complete\n");
-			if (lux > LUX_THRESHOLD_HIGH){
-				sprintf(buf, "lux:%u\n", lux);
-				UART_putstring(buf);
+			sprintf(buf, "lux:%u\n", lux);
+			UART_putstring(buf);
+			if (lux > LUX_THRESHOLD_HIGH)
 				curtain_roll2top();
-			}
-			else if (lux < LUX_THRESHOLD_LOW){				
-				sprintf(buf, "lux:%u\n", lux);
-				UART_putstring(buf);
-				curtain_roll2bottom();		
-			}
+			else if (lux < LUX_THRESHOLD_LOW)
+				curtain_roll2bottom();
+			
 			
 			// get temperature and humidity
 			triggerMeasurement();
-			UART_putstring("trigger complete\n");
 			char t_h[6];
 			readTH(t_h);
-			UART_putstring("readTH complete\n");
 			
 			
 			// check humidity
 			uint16_t hum = atoi(t_h) % 100;
 			if (hum > HUM_THRESHOLD_HIGH){
-				sprintf(buf, "hum:%u\n", hum);
-				UART_putstring(buf);
 				Open_window_to(0);
 			}
 			else if (hum < HUM_THRESHOLD_LOW){
-				sprintf(buf, "hum:%u\n", hum);
-				UART_putstring(buf);
 				Open_window_to(48);
 			}
 			

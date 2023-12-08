@@ -17,12 +17,12 @@ void init_stepper()
 }
 
 void curtain_roll2top(){
-	if (stepper_angle < 6144){
-		for (int i=stepper_angle; i < 6144; i++){
+	if (stepper_angle < WORKING_RANGE){
+		for (int i=stepper_angle; i < WORKING_RANGE; i++){
 			step_CW();
-			_delay_ms(40);
+			_delay_ms(WORKING_DELAY);
 		}
-		stepper_angle = 6144;
+		stepper_angle = WORKING_RANGE;
 	}
 }
 
@@ -30,7 +30,7 @@ void curtain_roll2bottom(){
 	if (stepper_angle > 0){
 		for (int i=stepper_angle; i > 0; i--){
 			step_CCW();
-			_delay_ms(40);
+			_delay_ms(WORKING_DELAY);
 		}
 		stepper_angle = 0;
 	}
@@ -40,19 +40,19 @@ void curtain_rolling (int8_t direction, int steps)//2048 steps for 1 revolution
 {
 	if (direction>0)
 	{
-		if (stepper_angle + steps < 6144){			
+		if (stepper_angle + steps < WORKING_RANGE){			
 			for (int i=0;i<steps;i++)
 			{
 				step_CW();
-				_delay_ms(40);
+				_delay_ms(WORKING_DELAY);
 				stepper_angle++;
 			}
 		}
 		else{
-			for (int i=stepper_angle; i < 6144; i++)
+			for (int i=stepper_angle; i < WORKING_RANGE; i++)
 			{
 				step_CW();
-				_delay_ms(40);
+				_delay_ms(WORKING_DELAY);
 				stepper_angle++;
 			}
 		}
@@ -63,14 +63,14 @@ void curtain_rolling (int8_t direction, int steps)//2048 steps for 1 revolution
 			for (int i=0; i<steps; i++)
 			{
 				step_CCW();
-				_delay_ms(40);
+				_delay_ms(WORKING_DELAY);
 				stepper_angle--;
 			}
 		}
 		else{
 			for (int i=stepper_angle; i>0; i--){
 				step_CCW();
-				_delay_ms(40);
+				_delay_ms(WORKING_DELAY);
 				stepper_angle--;
 			}
 		}

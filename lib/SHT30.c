@@ -31,9 +31,7 @@ void triggerMeasurement() {
 void readTH(char* buffer) {
 	// Read temperature data (first 3 bytes: 2 for temperature, 1 for CRC)
 	TWI_start();
-	UART_putstring("TWI_start\n");
 	TWI_write((SHT30_ADDR << 1) | 1); // Send address with read bit
-	UART_putstring("TWI_write ADDR\n");
 
 	uint8_t tempMSB = TWI_read_ACK();
 	uint8_t tempLSB = TWI_read_ACK();
@@ -42,9 +40,7 @@ void readTH(char* buffer) {
 	uint8_t humLSB = TWI_read_ACK();
 	 
 	TWI_read_NACK(); // CRC byte, ignored for simplicity
-	UART_putstring("TWI_read_NACK\n");
 	TWI_stop();
-	UART_putstring("TWI_stop\n");
 	 
  	
 	uint16_t rawTemperature = (tempMSB << 8) | tempLSB;
